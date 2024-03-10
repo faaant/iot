@@ -20,8 +20,6 @@ class FileDatasource:
         # read next row
         self.row_counter += 1
 
-        print(data)
-
         return data
 
     def startReading(self, *args, **kwargs):
