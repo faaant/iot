@@ -146,7 +146,7 @@ async def create_processed_agent_data(data: List[ProcessedAgentData]):
 
     # Send data to subscribers
     for item in data:
-        await send_data_to_subscribers(item.agent_data.user_id, item.model_dump())
+        await send_data_to_subscribers(item.agent_data.user_id, [{**d, "timestamp": d["timestamp"].isoformat()} for d in query_values])
 
 @app.get(
     "/processed_agent_data/{processed_agent_data_id}",

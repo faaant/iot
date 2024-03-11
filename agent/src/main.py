@@ -1,10 +1,11 @@
 from paho.mqtt import client as mqtt_client
 import json
 import time
+from schema.aggregated_data_schema import AggregatedDataSchema
 from schema.accelerometer_schema import AccelerometerSchema
 from schema.gps_schema import GpsSchema
 from schema.parking_schema import ParkingSchema
-from file_datasource import AccelerometerFileDatasource, GpsFileDatasource, ParkingFileDatasource
+from file_datasource import AggregatedDatasource, AccelerometerFileDatasource, GpsFileDatasource, ParkingFileDatasource
 import config
 
 
@@ -49,12 +50,14 @@ def run():
     # Prepare mqtt client
     client = connect_mqtt(config.MQTT_BROKER_HOST, config.MQTT_BROKER_PORT)
     # Prepare datasource
+    aggregatedDatasource = AggregatedDatasource("data/accelerometer.csv", "data/gps.csv")
     accelerometerDatasource = AccelerometerFileDatasource("data/accelerometer.csv")
     gpsDatasource = GpsFileDatasource("data/gps.csv")
     parkingDatasource = ParkingFileDatasource("data/parking.csv")
 
     # Infinity publish data
     publish(client, config.DELAY, [
+        [aggregatedDatasource, config.MQTT_TOPIC, AggregatedDataSchema()],
         [accelerometerDatasource, config.MQTT_ACCELEROMETER_TOPIC, AccelerometerSchema()],
         [gpsDatasource, config.MQTT_GPS_TOPIC, GpsSchema()],
         [parkingDatasource, config.MQTT_PARKING_TOPIC, ParkingSchema()]

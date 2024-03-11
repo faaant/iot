@@ -1,5 +1,4 @@
 version: "3.9"
-name: "road_vision__hub"
 services:
   mqtt:
     image: eclipse-mosquitto
@@ -10,7 +9,7 @@ services:
       - ./mosquitto/log:/mosquitto/log
     ports:
       - 1883:1883
-      - 9001:9001
+      - 19001:9001
     networks:
       mqtt_network:
 
@@ -26,30 +25,21 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db/structure.sql:/docker-entrypoint-initdb.d/structure.sql
-    ports:
-      - "5432:5432"
     networks:
       db_network:
 
-
-  pgadmin:
-    container_name: pgadmin4
-    image: dpage/pgadmin4
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: root
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
+  redis:
+    image: redis:latest
+    container_name: redis
     ports:
-      - "5050:80"
+      - "6379:6379"
     networks:
-      db_network:
+      hub_redis:
 
 
   store:
     container_name: store
-    build: ../../store
+    build: ../store
     depends_on:
       - postgres_db
     restart: always
@@ -62,22 +52,34 @@ services:
     ports:
       - "8000:8000"
     networks:
-      db_network:
       hub_store:
+      db_network:
+      hub:
 
 
-  redis:
-    image: redis:latest
-    container_name: redis
-    ports:
-      - "6379:6379"
+  edge:
+    container_name: edge
+    build: ../edge
+    depends_on:
+      - mqtt
+      - hub
+    environment:
+      MQTT_BROKER_HOST: "mqtt"
+      MQTT_BROKER_PORT: 1883
+      MQTT_TOPIC: "agent_data_topic"
+      HUB_HOST: "hub"
+      HUB_PORT: 8000
+      HUB_MQTT_BROKER_HOST: "mqtt"
+      HUB_MQTT_BROKER_PORT: 1883
+      HUB_MQTT_TOPIC: "processed_data_topic"
     networks:
-      hub_redis:
+      mqtt_network:
+      edge_hub:
 
 
   hub:
     container_name: hub
-    build: ../
+    build: ../hub
     depends_on:
       - mqtt
       - redis
@@ -92,16 +94,33 @@ services:
       MQTT_TOPIC: "processed_data_topic"
       BATCH_SIZE: 1
     ports:
-      - "9000:8000"
+      - "19000:8000"
     networks:
       mqtt_network:
       hub_store:
       hub_redis:
 
 
+  fake_agent:
+    container_name: agent
+    build: ../agent
+    depends_on:
+      - mqtt
+    environment:
+      MQTT_BROKER_HOST: "mqtt"
+      MQTT_BROKER_PORT: 1883
+      MQTT_TOPIC: "agent_data_topic"
+      DELAY: 1
+      USER_ID: 1
+    networks:
+      mqtt_network:
+
+
 networks:
   mqtt_network:
   db_network:
+  edge_hub:
+  hub:
   hub_store:
   hub_redis:
 
