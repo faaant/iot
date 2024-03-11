@@ -1,7 +1,7 @@
 import config
 from csv import reader
 from datetime import datetime
-from typing import Dict, Tuple
+from domain.aggregated_data import AggregatedData
 from domain.accelerometer import Accelerometer
 from domain.parking import Parking
 from domain.gps import Gps
@@ -66,3 +66,23 @@ class ParkingFileDatasource(FileDatasource):
                 latitude=float(data[2])
             )
         )
+    
+
+class AggregatedDatasource:
+    def __init__(self, accelerometer_filename: str, gps_filename: str) -> None:
+        self.accelerometerDatasource = AccelerometerFileDatasource(accelerometer_filename=accelerometer_filename)
+        self.gpsDatasource = GpsFileDatasource(gps_filename=gps_filename)
+
+    def read(self):
+        acceletometerData = self.accelerometerDatasource.read()
+        gpsData = self.gpsDatasource.read()
+
+        return AggregatedData(accelerometer=acceletometerData, gps=gpsData, timestamp=datetime.now(), user_id=config.USER_ID)
+
+    def startReading(self, *args, **kwargs):
+        self.accelerometerDatasource.startReading()
+        self.gpsDatasource.startReading()
+
+    def stopReading(self, *args, **kwargs):
+        self.accelerometerDatasource.stopReading()
+        self.gpsDatasource.stopReading()
