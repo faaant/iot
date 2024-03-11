@@ -18,8 +18,13 @@ def process_agent_data(
             road_state = 'FINE',
             agent_data = agent_data
         )
+    elif 13000 > agent_data.accelerometer.z < 19000:
+        return ProcessedAgentData(
+            road_state = 'SLIGHTLY DAMAGED ROAD',
+            agent_data = agent_data
+        )
 
     return ProcessedAgentData(
-        road_state = 'NEED TO BE REPAIRED',
+        road_state = 'VERY DAMAGED ROAD',
         agent_data = agent_data
     )
