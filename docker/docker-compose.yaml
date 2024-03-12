@@ -9,7 +9,7 @@ services:
       - ./mosquitto/log:/mosquitto/log
     ports:
       - 1883:1883
-      - 19001:9001
+      - 9001:9001
     networks:
       mqtt_network:
 
@@ -94,7 +94,7 @@ services:
       MQTT_TOPIC: "processed_data_topic"
       BATCH_SIZE: 1
     ports:
-      - "19000:8000"
+      - "9000:8000"
     networks:
       mqtt_network:
       hub_store:

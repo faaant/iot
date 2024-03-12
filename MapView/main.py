@@ -6,10 +6,10 @@ from kivy_garden.mapview import MapMarker, MapView
 from kivy.clock import Clock
 from lineMapLayer import LineMapLayer
 
-
 class MapViewApp(App):
     def __init__(self, **kwargs):
         super().__init__()
+        self.startPoint = (50.45034509664691, 30.5246114730835)
         self.badRoadPoints = []
 
     def on_start(self):
@@ -45,10 +45,10 @@ class MapViewApp(App):
         Оновлює відображення маркера машини на мапі
         :param point: GPS координати
         """
-        self.map_view.remove_marker(self.car_marker)
-        self.car_marker.lat = point[0]
-        self.car_marker.lon = point[1]
-        self.map_view.add_marker(self.car_marker)
+        self.map_view.remove_marker(self.car)
+        self.car.lat = point[0]
+        self.car.lon = point[1]
+        self.map_view.add_marker(self.car)
 
     def set_pothole_marker(self, point):
         """
@@ -77,19 +77,21 @@ class MapViewApp(App):
         Ініціалізує мапу MapView(zoom, lat, lon)
         :return: мапу
         """
-        self.map_layer = LineMapLayer()
         self.map_view = MapView(
             zoom=15,
-            lat=50.4501,
-            lon=30.5234,
+            lat=self.startPoint[0],
+            lon=self.startPoint[1],
         )
+
+        self.map_layer = LineMapLayer()
         self.map_view.add_layer(self.map_layer, mode="scatter")
-        self.car_marker = MapMarker(
-            lat=50.45034509664691,
-            lon=30.5246114730835,
+        
+        self.car = MapMarker(
+            lat=self.startPoint[0],
+            lon=self.startPoint[1],
             source="images/car.png",
         )
-        self.map_view.add_marker(self.car_marker)
+        self.map_view.add_marker(self.car)
         return self.map_view
 
 
