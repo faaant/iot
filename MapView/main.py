@@ -16,6 +16,16 @@ class MapViewApp(App):
         """
         Встановлює необхідні маркери, викликає функцію для оновлення мапи
         """
+        self.map_layer = LineMapLayer()
+        self.map_view.add_layer(self.map_layer, mode="scatter")
+        
+        self.car = MapMarker(
+            lat=self.startPoint[0],
+            lon=self.startPoint[1],
+            source="images/car.png",
+        )
+        self.map_view.add_marker(self.car)
+        
         self.datasource = Datasource(1)
         Clock.schedule_interval(self.update, 1)
 
@@ -83,15 +93,6 @@ class MapViewApp(App):
             lon=self.startPoint[1],
         )
 
-        self.map_layer = LineMapLayer()
-        self.map_view.add_layer(self.map_layer, mode="scatter")
-        
-        self.car = MapMarker(
-            lat=self.startPoint[0],
-            lon=self.startPoint[1],
-            source="images/car.png",
-        )
-        self.map_view.add_marker(self.car)
         return self.map_view
 
 
